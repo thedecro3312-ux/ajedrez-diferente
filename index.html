@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="data:," />
-    <title>Ajedrez Diferente</title>
+    <title>Ajedrez Cruzado</title>
     <style>
       button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2rem; }
       * { box-sizing: border-box; }
@@ -130,6 +130,10 @@
       .pc.c0{ color:var(--p0);} .pc.c1{ color:var(--p1);} .pc.c2{ color:var(--p2);} .pc.c3{ color:var(--p3);}
       .badge{ position:absolute; top:0; right:1px; font-size:3.2cqw; z-index:3; pointer-events:none; }
       @supports not (font-size:1cqw){ .badge{ font-size:11px; } }
+      /* Tablero clásico 8×8 (local de 2 jugadores): celdas más grandes, piezas a escala */
+      .board.classic .pc{ font-size:10.4cqw; }
+      .board.classic .badge{ font-size:5.6cqw; }
+      @supports not (font-size:1cqw){ .board.classic .pc{ font-size:38px; } .board.classic .badge{ font-size:18px; } }
       /* ---------- Skins de tablero ---------- */
       body[data-board="clasico"]{ --sq-l:#eee0bd; --sq-d:#7d9b76; --fog:#2a323d; --board-edge:#4a3b28; --gold:#b97e10; --hl-last:rgba(255,213,79,.38); --hl-check:rgba(220,50,40,.45); --hl-frozen:rgba(120,200,255,.35); --sel-ring:#0e7c86; }
       body[data-board="madera"]{ --sq-l:#ecc987; --sq-d:#7c4a21; --fog:#33200f; --board-edge:#452a12; --gold:#ffd34d; --hl-last:rgba(255,236,170,.45); --hl-check:rgba(235,45,30,.5); --hl-frozen:rgba(140,210,255,.42); --sel-ring:#0e7c86; }
@@ -232,8 +236,8 @@
     <div class="wrap">
       <!-- ================= SETUP ================= -->
       <section id="setupScreen">
-        <h1>Ajedrez Diferente ♞</h1>
-        <p class="sub">El ajedrez de siempre, pero en un tablero en cruz para <b>2 a 4 jugadores</b>, con tres giros combinables: todos contra todos, niebla de guerra y cartas de poder. Primero elige cómo quieres jugar:</p>
+        <h1>Ajedrez Cruzado ♞</h1>
+        <p class="sub">El ajedrez de siempre para <b>2 a 4 jugadores</b>: en local de 2 se juega en el tablero clásico 8×8, y con 3 o 4 jugadores (o en línea) en el tablero en cruz, con tres giros combinables: todos contra todos, niebla de guerra y cartas de poder. Primero elige cómo quieres jugar:</p>
         <div id="modeChooser">
           <div class="mode-cards">
             <button class="btn mode-card" id="modeLocalBtn" type="button">
@@ -266,6 +270,7 @@
                 <button data-count="2">2</button><button data-count="3">3</button><button data-count="4" class="on">4</button>
               </span>
             </div>
+            <p class="sub" id="classicNote" style="display:none; margin:10px 0 2px; padding:9px 12px; background:var(--panel2); border-radius:10px;">♟️ <b>Tablero clásico 8×8:</b> con 2 jugadores, la partida local se juega en el tablero clásico, con los mismos ejércitos de 8 piezas y las mismas reglas.</p>
             <div id="seatRows"></div>
             <label class="switch">
               <span class="txt"><b>🌫️ Niebla de guerra</b><span>Cada quien solo ve a 2 casillas alrededor de sus piezas.</span></span>
@@ -283,11 +288,11 @@
           <div class="panel setup-sec">
             <h2>Los tres giros</h2>
             <ul class="twists">
-              <li><b>👑 Todos contra todos</b>Tablero en cruz de 14×14 con un ejército en cada esquina (8 piezas por jugador). Si te dan jaque mate quedas eliminado y tus piezas salen del tablero. Gana el último rey en pie.</li>
+              <li><b>👑 Todos contra todos</b>Un ejército de 8 piezas por jugador: en el tablero en cruz de 14×14, cada uno en su esquina; en el clásico 8×8 de 2 jugadores, frente a frente. Si te dan jaque mate quedas eliminado y tus piezas salen del tablero. Gana el último rey en pie.</li>
               <li><b>🌫️ Niebla de guerra</b>Con la niebla activada solo ves tus piezas y lo que haya a 2 casillas de ellas. Los enemigos aparecen de sorpresa… y tú también. Al pasar el turno, la pantalla se tapa para que nadie espíe.</li>
               <li><b>🃏 Cartas y poderes</b>Cinco cartas posibles: <b>Doble jugada</b> (mueve dos veces), <b>Congelar</b> (una pieza rival no se mueve en su turno), <b>Revivir</b> (regresa una pieza capturada a tu zona), <b>Escudo</b> (una pieza tuya no puede ser capturada por una ronda) e <b>Intercambio</b> (cambia de lugar dos piezas tuyas).</li>
             </ul>
-            <p class="sub" style="margin-top:10px">Las piezas se mueven como en el ajedrez clásico. Sin enroque ni captura al paso; el peón corona al llegar al extremo opuesto de su brazo.</p>
+            <p class="sub" style="margin-top:10px">Las piezas se mueven como en el ajedrez clásico. Sin enroque ni captura al paso; el peón corona al llegar al extremo opuesto del tablero.</p>
           </div>
         </div>
         </div><!-- /localSetup -->
@@ -470,7 +475,7 @@
     <div class="overlay" id="reviveOverlay">
       <div class="sheet">
         <h2>💫 Revivir</h2>
-        <p>Elige qué pieza capturada regresa. Después toca una casilla libre de tu zona inicial (las dos filas de tu esquina).</p>
+        <p>Elige qué pieza capturada regresa. Después toca una casilla libre de tu zona inicial (las dos filas donde empezaste).</p>
         <div class="revive-opts" id="reviveOpts"></div>
         <p><button class="btn" id="reviveCancel">Cancelar</button></p>
       </div>
@@ -527,8 +532,8 @@
           <p>Ser el último rey en pie. Cuando a un jugador le dan jaque mate (o se queda sin movimientos), queda eliminado y todas sus piezas salen del tablero.</p>
           <h3>El tablero y los ejércitos</h3>
           <ul>
-            <li>Tablero en cruz de 14×14. Cada jugador empieza en una esquina con 8 piezas: torre, caballo, dama, rey y 4 peones.</li>
-            <li>Las piezas se mueven como en el ajedrez clásico. El peón avanza hacia el centro y sigue hasta el otro extremo; al llegar, corona.</li>
+            <li>Con 3 o 4 jugadores (y siempre en línea): tablero en cruz de 14×14, cada jugador en una esquina. En local de 2 jugadores: tablero clásico 8×8, los dos ejércitos frente a frente. Cada jugador empieza con 8 piezas: torre, caballo, dama, rey y 4 peones.</li>
+            <li>Las piezas se mueven como en el ajedrez clásico. El peón avanza hacia el lado contrario y corona al llegar al extremo opuesto del tablero.</li>
             <li>El peón puede avanzar 2 casillas en su primer movimiento. No hay enroque ni captura al paso.</li>
             <li>Nadie puede dejar a su propio rey en jaque, y el rey nunca se captura: se gana con jaque mate.</li>
           </ul>
@@ -564,11 +569,13 @@
     <script>
     'use strict';
     /* ============================================================
-       AJEDREZ DIFERENTE — motor
-       Tablero en cruz 14x14. Asientos: 0=Sur(Rojo) 1=Este(Azul)
+       AJEDREZ CRUZADO — motor
+       Tablero en cruz 14x14; en local de 2 jugadores, tablero
+       clásico 8x8 (CLASSIC). Asientos: 0=Sur(Rojo) 1=Este(Azul)
        2=Norte(Verde) 3=Oeste(Dorado). Turnos en orden 0,1,2,3.
        ============================================================ */
     var N = 14;
+    var CLASSIC = false;
     var GLYPH = { k:'\u265A', q:'\u265B', r:'\u265C', b:'\u265D', n:'\u265E', p:'\u265F' };
     /* ---------- Skins (preferencia LOCAL de cada dispositivo) ----------
        No van en CFG ni en los snapshots de PeerJS: cada jugador en línea
@@ -625,32 +632,34 @@
     var DIR = [ {dr:-1,dc:0}, {dr:0,dc:-1}, {dr:1,dc:0}, {dr:0,dc:1} ];
     function isPromoSquare(seat, r, c){
       if (seat===0) return r===0;
-      if (seat===2) return r===13;
+      if (seat===2) return r===N-1;
       if (seat===1) return c===0;
-      return c===13;
+      return c===N-1;
     }
     function isStartSquare(seat, piece, r, c){
       if (piece.t!=='p') return false;
-      if (seat===0) return r===12;
+      if (seat===0) return r===N-2;
       if (seat===2) return r===1;
-      if (seat===1) return c===12;
+      if (seat===1) return c===N-2;
       return c===1;
     }
-    // Zona inicial (para Revivir): las dos filas/columnas de la esquina propia
+    // Zona inicial (para Revivir): las dos filas/columnas de la zona propia
     function homeZone(seat){
       var z=[], r, c;
-      if (seat===0){ for(r=12;r<=13;r++) for(c=5;c<=8;c++) z.push([r,c]); }
-      if (seat===2){ for(r=0;r<=1;r++) for(c=5;c<=8;c++) z.push([r,c]); }
-      if (seat===1){ for(r=5;r<=8;r++) for(c=12;c<=13;c++) z.push([r,c]); }
+      var c0 = CLASSIC ? 2 : 5, c1 = CLASSIC ? 5 : 8;
+      if (seat===0){ for(r=N-2;r<=N-1;r++) for(c=c0;c<=c1;c++) z.push([r,c]); }
+      if (seat===2){ for(r=0;r<=1;r++) for(c=c0;c<=c1;c++) z.push([r,c]); }
+      if (seat===1){ for(r=5;r<=8;r++) for(c=N-2;c<=N-1;c++) z.push([r,c]); }
       if (seat===3){ for(r=5;r<=8;r++) for(c=0;c<=1;c++) z.push([r,c]); }
       return z;
     }
     function validSq(r,c){
-      if (r<0||r>13||c<0||c>13) return false;
+      if (r<0||r>=N||c<0||c>=N) return false;
+      if (CLASSIC) return true;
       return (r>=4 && r<=9) || (c>=4 && c<=9);
     }
     function key(r,c){ return r+','+c; }
-    function sqName(r,c){ return 'abcdefghijklmn'[c] + (14-r); }
+    function sqName(r,c){ return 'abcdefghijklmn'[c] + (N-r); }
 
     function emptyBoard(){
       var b=[], r;
@@ -660,6 +669,12 @@
     function setupPieces(board, seat){
       var back = ['r','n','q','k'], i, t;
       function put(r,c,t){ board[r][c] = { t:t, p:seat, frozen:false, shield:false }; }
+      if (CLASSIC){
+        // 8x8: ejércitos centrados en las columnas 2-5, mismo orden que en la cruz
+        if (seat===0){ for(i=0;i<4;i++){ put(N-1,2+i,back[i]); put(N-2,2+i,'p'); } }
+        if (seat===2){ var backC = ['k','q','n','r']; for(i=0;i<4;i++){ put(0,2+i,backC[i]); put(1,2+i,'p'); } }
+        return;
+      }
       if (seat===0){ for(i=0;i<4;i++){ put(13,5+i,back[i]); put(12,5+i,'p'); } }
       if (seat===2){ var backN = ['k','q','n','r']; for(i=0;i<4;i++){ put(0,5+i,backN[i]); put(1,5+i,'p'); } }
       if (seat===1){ for(i=0;i<4;i++){ put(5+i,13,back[i]); put(5+i,12,'p'); } }
@@ -851,12 +866,26 @@
     }
     function orderFor(count){ return count===2 ? [0,2] : (count===3 ? [0,1,2] : [0,1,2,3]); }
 
+    /* Tablero clásico 8×8 SOLO en local de 2 jugadores; en línea y en
+       local de 3-4 siempre la cruz 14×14. Fija N, CLASSIC y la retícula. */
+    function applyBoardMode(cfg){
+      CLASSIC = (!ONLINE.active && !!cfg && cfg.count===2);
+      N = CLASSIC ? 8 : 14;
+      var el = document.getElementById('boardEl');
+      if (el){
+        el.style.gridTemplateColumns = 'repeat(' + N + ',1fr)';
+        el.style.gridTemplateRows = 'repeat(' + N + ',1fr)';
+        el.classList.toggle('classic', CLASSIC);
+      }
+    }
+
     function aliveCount(){ return G.order.filter(function(s){ return G.alive[s]; }).length; }
     function humansAliveCount(){ return G.order.filter(function(s){ return G.alive[s] && CFG.types[s]==='human'; }).length; }
     function totalHumans(){ return G.order.filter(function(s){ return CFG.types[s]==='human'; }).length; }
 
     function newGame(cfg){
       CFG = cfg;
+      applyBoardMode(cfg);
       epoch++;
       var order = cfg.count===2 ? [0,2] : (cfg.count===3 ? [0,1,2] : [0,1,2,3]);
       var board = emptyBoard();
@@ -880,6 +909,7 @@
       var firstHuman = order.filter(function(s){ return cfg.types[s]==='human'; })[0];
       G.viewer = (cfg.fog && firstHuman!==undefined) ? firstHuman : -1;
       logMsg('¡Empieza la partida! ' + (cfg.count===2 ? 'Duelo' : 'Todos contra todos') +
+             (CLASSIC ? ' en el tablero clásico 8×8' : '') +
              (cfg.fog ? ' con niebla' : '') + (cfg.cards ? ' y cartas' : '') + '.');
       startTurn(true);
     }
@@ -1192,7 +1222,8 @@
       if (destAttacked && !defended) score -= VAL[m.piece] * 0.85;
       else if (destAttacked && captured && VAL[captured.t] < VAL[m.piece]) score -= (VAL[m.piece]-VAL[captured.t]) * 0.5;
       // Avanzar hacia el centro y hacia los reyes rivales
-      var d0 = Math.abs(m.fr-6.5)+Math.abs(m.fc-6.5), d1 = Math.abs(m.tr-6.5)+Math.abs(m.tc-6.5);
+      var ctr = (N-1)/2;
+      var d0 = Math.abs(m.fr-ctr)+Math.abs(m.fc-ctr), d1 = Math.abs(m.tr-ctr)+Math.abs(m.tc-ctr);
       score += (d0-d1) * 3.5;
       if (m.piece==='p') score += 6;
       // Material propio tras el movimiento (ligero empujón a conservar piezas)
@@ -1293,7 +1324,7 @@
       // Siempre visible en qué modo se está jugando
       $('modeBadge').textContent = ONLINE.active
         ? ('🌐 En línea · Sala ' + (ONLINE.code || '····') + (ONLINE.mySeat>=0 ? ' · Tu ejército: ' + SEATS[ONLINE.mySeat].name : ''))
-        : '🏠 Partida local';
+        : ('🏠 Partida local · ' + (CLASSIC ? 'Tablero clásico 8×8' : 'Tablero en cruz 14×14'));
       $('leaveRoomBtn').style.display = ONLINE.active ? '' : 'none';
       netBroadcastSoon();
     }
@@ -1502,11 +1533,14 @@
     function clearPresets(){
       $('presetRow').querySelectorAll('.preset').forEach(function(b){ b.classList.remove('on'); });
     }
+    function updateClassicNote(){
+      $('classicNote').style.display = setupState.count===2 ? '' : 'none';
+    }
     $('countSeg').querySelectorAll('button').forEach(function(b){
       b.addEventListener('click', function(){
         setupState.count = +b.dataset.count;
         $('countSeg').querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x===b); });
-        buildSeatRows(); clearPresets();
+        buildSeatRows(); clearPresets(); updateClassicNote();
       });
     });
     var PRESETS = {
@@ -1536,12 +1570,14 @@
       };
     }
     function startGame(){
+      var cfg = readCfg();
       $('setupScreen').style.display = 'none';
       $('gameScreen').style.display = 'block';
       $('winOverlay').classList.remove('show');
       $('passOverlay').classList.remove('show');
+      applyBoardMode(cfg);
       buildBoardDom();
-      newGame(readCfg());
+      newGame(cfg);
     }
     $('startBtn').addEventListener('click', startGame);
     $('rematchBtn').addEventListener('click', function(){
@@ -1795,11 +1831,13 @@
       $('setupScreen').style.display = 'none';
       $('gameScreen').style.display = 'block';
       $('winOverlay').classList.remove('show');
-      buildBoardDom();
-      newGame({
+      var onlineCfg = {
         count: ONLINE.lobby.count, types: types,
         fog: $('fogToggleOnline').checked, cards: $('cardsToggleOnline').checked
-      });
+      };
+      applyBoardMode(onlineCfg);
+      buildBoardDom();
+      newGame(onlineCfg);
     }
 
     /* ---------- Anfitrión: aplicar intenciones de invitados ---------- */
@@ -2016,6 +2054,7 @@
         hideLobby();
         $('setupScreen').style.display = 'none';
         $('gameScreen').style.display = 'block';
+        applyBoardMode(CFG);
         buildBoardDom();
       }
       if (snap.phase!=='over'){
