@@ -33,7 +33,7 @@
         font-family: ui-rounded, "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
         -webkit-tap-highlight-color: transparent;
       }
-      .wrap{ max-width:1120px; margin:0 auto; padding:14px 14px 40px; }
+      .wrap{ max-width:1120px; margin:0 auto; padding:74px 14px 40px; }
       h1,h2,h3{ font-family: Iowan Old Style, Palatino, Georgia, serif; margin:0; }
       h1{ font-size:clamp(26px,5vw,38px); letter-spacing:.2px; }
       .sub{ color:var(--ink2); margin:4px 0 0; font-size:15px; }
@@ -53,6 +53,16 @@
         font-size:16px; padding:12px 18px; min-height:52px; box-shadow:var(--shadow);
       }
       .sala-top{ display:flex; margin-bottom:14px; }
+      /* Botón fijo a la Sala de Juegos: siempre visible, encima de todo */
+      .sala-fixed{ position:fixed; top:calc(10px + env(safe-area-inset-top, 0px)); left:10px; z-index:200; }
+      /* ---------- Elección de modo (local / en línea) ---------- */
+      .mode-cards{ display:grid; grid-template-columns:1fr; gap:12px; margin-top:16px; }
+      @media (min-width:700px){ .mode-cards{ grid-template-columns:1fr 1fr; } }
+      .mode-card{ flex-direction:column; align-items:flex-start; justify-content:flex-start; text-align:left; gap:6px; padding:20px; min-height:118px; }
+      .mode-card b{ font-size:21px; }
+      .mode-card span{ font-size:14.5px; color:var(--ink2); font-weight:500; line-height:1.45; }
+      .modebar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px; }
+      .modebadge{ font-weight:800; font-size:14.5px; padding:7px 13px; border-radius:20px; background:var(--accent); color:var(--accent-ink); }
       /* ---------- Setup ---------- */
       .setup-grid{ display:grid; grid-template-columns:1fr; gap:14px; margin-top:16px; }
       @media (min-width:860px){ .setup-grid{ grid-template-columns: 1.25fr .9fr; } }
@@ -218,12 +228,29 @@
     </style>
   </head>
   <body>
+    <a class="btn sala sala-fixed" href="https://thedecro3312-ux.github.io/sala-de-juegos/">← Sala de Juegos</a>
     <div class="wrap">
       <!-- ================= SETUP ================= -->
       <section id="setupScreen">
-        <div class="sala-top"><button class="btn sala salaBtn" type="button">← Sala de Juegos</button></div>
         <h1>Ajedrez Diferente ♞</h1>
-        <p class="sub">El ajedrez de siempre, pero en un tablero en cruz para <b>2 a 4 jugadores</b>, con tres giros combinables: todos contra todos, niebla de guerra y cartas de poder. En el mismo dispositivo, por turnos, o contra la CPU.</p>
+        <p class="sub">El ajedrez de siempre, pero en un tablero en cruz para <b>2 a 4 jugadores</b>, con tres giros combinables: todos contra todos, niebla de guerra y cartas de poder. Primero elige cómo quieres jugar:</p>
+        <div id="modeChooser">
+          <div class="mode-cards">
+            <button class="btn mode-card" id="modeLocalBtn" type="button">
+              <b>🏠 Jugar en local</b>
+              <span>En este mismo dispositivo: pasándolo por turnos o contra la CPU. Tú eliges los asientos (humano o CPU), los presets y los giros.</span>
+            </button>
+            <button class="btn mode-card" id="modeOnlineBtn" type="button">
+              <b>🌐 Jugar en línea</b>
+              <span>Cada quien en su teléfono o PC: crea una sala con un código de 4 letras o entra a una con el código de un amigo.</span>
+            </button>
+          </div>
+        </div>
+        <div id="localSetup" style="display:none">
+          <div class="modebar">
+            <button class="btn small backModesBtn" type="button">← Cambiar modo</button>
+            <span class="modebadge">🏠 Modo local — en este dispositivo</span>
+          </div>
         <div class="setup-grid">
           <div class="panel setup-sec">
             <h2>Modo de partida</h2>
@@ -263,6 +290,7 @@
             <p class="sub" style="margin-top:10px">Las piezas se mueven como en el ajedrez clásico. Sin enroque ni captura al paso; el peón corona al llegar al extremo opuesto de su brazo.</p>
           </div>
         </div>
+        </div><!-- /localSetup -->
         <div class="panel setup-sec" style="margin-top:14px">
           <h2>🎨 Apariencia — skins</h2>
           <p class="sub" style="margin:0 0 12px">Elige el estilo de las piezas y del tablero. Se guarda en este dispositivo; en línea, cada jugador ve sus propias skins.</p>
@@ -310,9 +338,22 @@
             </div>
           </div>
         </div>
+        <div id="onlineSetup" style="display:none">
+          <div class="modebar">
+            <button class="btn small backModesBtn" type="button">← Cambiar modo</button>
+            <span class="modebadge">🌐 Modo en línea — cada quien en su dispositivo</span>
+          </div>
         <div class="panel setup-sec" style="margin-top:14px">
-          <h2>🌐 En línea — cada quien en su dispositivo</h2>
-          <p class="sub" style="margin:0 0 6px">El anfitrión crea una sala con un código de 4 letras y los demás entran con ese código desde su propio teléfono o PC. Cada quien ve solo su propia niebla de guerra y sus propias cartas; los movimientos, las cartas jugadas y los turnos se sincronizan para todos. La niebla y las cartas de la partida en línea se toman de los interruptores de la izquierda.</p>
+          <h2>🌐 Sala en línea</h2>
+          <p class="sub" style="margin:0 0 6px">El anfitrión crea una sala con un código de 4 letras y los demás entran con ese código desde su propio teléfono o PC. Cada quien ve solo su propia niebla de guerra y sus propias cartas; los movimientos, las cartas jugadas y los turnos se sincronizan para todos. Si nadie entra, la sala se cierra sola a los 10 minutos.</p>
+          <label class="switch">
+            <span class="txt"><b>🌫️ Niebla de guerra</b><span>Para la partida en línea: cada quien solo ve a 2 casillas alrededor de sus piezas.</span></span>
+            <input type="checkbox" id="fogToggleOnline" />
+          </label>
+          <label class="switch">
+            <span class="txt"><b>🃏 Cartas de poder</b><span>Para la partida en línea: robas 1 carta por turno (máx. 5) y puedes jugar 1 por turno.</span></span>
+            <input type="checkbox" id="cardsToggleOnline" checked />
+          </label>
           <div class="rowline">
             <span class="seatname">Jugadores en la sala</span>
             <span class="seg" id="onlineCountSeg">
@@ -328,6 +369,7 @@
           </div>
           <div class="handnote" id="onlineMsg"></div>
         </div>
+        </div><!-- /onlineSetup -->
       </section>
 
       <!-- ================= GAME ================= -->
@@ -335,7 +377,9 @@
         <div class="toolbar">
           <button class="btn small" id="menuBtn">← Menú</button>
           <button class="btn small" id="restartBtn">↻ Reiniciar</button>
+          <span class="tag2" id="modeBadge">🏠 Partida local</span>
           <span class="spacer"></span>
+          <button class="btn small danger" id="leaveRoomBtn" style="display:none">Salir de la sala</button>
           <button class="btn small" id="skinBtn">🎨 Skins</button>
           <button class="btn small" id="soundBtn">🔊 Sonido</button>
           <button class="btn small" id="helpBtnGame">Reglas</button>
@@ -370,6 +414,8 @@
         <h2>Sala en línea 🌐</h2>
         <p style="margin-bottom:0">Código de la sala:</p>
         <div class="bigcode" id="lobbyCode">····</div>
+        <p style="margin:0 0 4px"><button class="btn small" id="copyCodeBtn" type="button">📋 Copiar código</button></p>
+        <div class="handnote" id="copyMsg" style="text-align:center"></div>
         <p id="lobbyHint">Comparte el código con tus amigos para que entren desde su teléfono o PC.</p>
         <div id="lobbySeats" style="text-align:left"></div>
         <div id="lobbyRuleRow" style="margin-top:12px">
@@ -381,9 +427,22 @@
         </div>
         <p id="lobbyRuleText" class="sub" style="text-align:left"></p>
         <p id="lobbyStatus"></p>
+        <p id="lobbyExpiry" class="sub" style="display:none"></p>
         <div class="startrow" style="justify-content:center">
           <button class="btn primary" id="lobbyStartBtn">▶ Empezar partida</button>
           <button class="btn" id="lobbyLeaveBtn">Salir de la sala</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmación genérica (salir a mitad de partida, etc.) -->
+    <div class="overlay" id="confirmOverlay">
+      <div class="sheet">
+        <h2 id="confirmTitle">¿Seguro?</h2>
+        <p id="confirmText"></p>
+        <div class="startrow" style="justify-content:center">
+          <button class="btn danger" id="confirmYes">Sí, salir</button>
+          <button class="btn" id="confirmNo">Seguir aquí</button>
         </div>
       </div>
     </div>
@@ -427,7 +486,6 @@
           <button class="btn primary" id="rematchBtn">↻ Revancha</button>
           <button class="btn" id="winMenuBtn">Menú</button>
         </div>
-        <p style="margin:14px 0 0"><button class="btn sala salaBtn" type="button">← Sala de Juegos</button></p>
       </div>
     </div>
 
@@ -502,7 +560,7 @@
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/peerjs@1/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js" integrity="sha384-x0YgkOr/3UOZP2CRDxGW9e0Q+2Qjyr3uJrm4xU32Y7ZCNAo7Cc7bjhrZMi/dwczu" crossorigin="anonymous"></script>
     <script>
     'use strict';
     /* ============================================================
@@ -1232,6 +1290,11 @@
       renderLog();
       $('resignBtn').style.display = (G.phase==='play' && seatIsLocalHuman(p)) ? '' : 'none';
       $('restartBtn').style.display = (ONLINE.active && !ONLINE.isHost) ? 'none' : '';
+      // Siempre visible en qué modo se está jugando
+      $('modeBadge').textContent = ONLINE.active
+        ? ('🌐 En línea · Sala ' + (ONLINE.code || '····') + (ONLINE.mySeat>=0 ? ' · Tu ejército: ' + SEATS[ONLINE.mySeat].name : ''))
+        : '🏠 Partida local';
+      $('leaveRoomBtn').style.display = ONLINE.active ? '' : 'none';
       netBroadcastSoon();
     }
     function renderPlayers(checkSeat){
@@ -1505,11 +1568,37 @@
       $('gameScreen').style.display = 'none';
       $('setupScreen').style.display = '';
     }
-    $('menuBtn').addEventListener('click', toMenu);
-    $('winMenuBtn').addEventListener('click', toMenu);
-    document.querySelectorAll('.salaBtn').forEach(function(b){
-      b.addEventListener('click', function(){ window.location.href = 'https://thedecro3312-ux.github.io/sala-de-juegos/'; });
+    /* ---------- Confirmación en página (los diálogos del navegador no funcionan embebidos) ---------- */
+    var confirmCb = null;
+    function askConfirm(title, text, yesLabel, cb){
+      $('confirmTitle').textContent = title;
+      $('confirmText').textContent = text;
+      $('confirmYes').textContent = yesLabel;
+      confirmCb = cb;
+      $('confirmOverlay').classList.add('show');
+    }
+    $('confirmYes').addEventListener('click', function(){
+      $('confirmOverlay').classList.remove('show');
+      var cb = confirmCb; confirmCb = null;
+      if (cb) cb();
     });
+    $('confirmNo').addEventListener('click', function(){
+      $('confirmOverlay').classList.remove('show');
+      confirmCb = null;
+    });
+    function menuExit(){
+      // Salir de una partida en línea en curso pide confirmación
+      if (ONLINE.active && ONLINE.inGame && G && G.phase!=='over'){
+        askConfirm('¿Salir de la sala?',
+          'La partida en línea está en curso. Si sales, abandonas la sala y la partida sigue sin ti (o termina, si eres el anfitrión).',
+          'Sí, salir de la sala', toMenu);
+        return;
+      }
+      toMenu();
+    }
+    $('menuBtn').addEventListener('click', menuExit);
+    $('leaveRoomBtn').addEventListener('click', menuExit);
+    $('winMenuBtn').addEventListener('click', toMenu);
     $('resignBtn').addEventListener('click', function(){
       if (!G || G.phase!=='play' || !seatIsLocalHuman(G.turn)) return;
       if (isGuest()){
@@ -1602,8 +1691,8 @@
         var hasGuest = data.seats.some(function(r){ return r.status==='joined'; });
         startBtn.disabled = hasOpen || !hasGuest;
         $('lobbyStatus').textContent = !hasGuest
-          ? 'Espera a que entre al menos un invitado.'
-          : (hasOpen ? 'Quedan asientos esperando: espera a que entren o ponles la CPU.' : '¡Sala completa! Ya pueden empezar.');
+          ? 'Esperando jugadores… Comparte el código para que entren.'
+          : (hasOpen ? 'Esperando jugadores… Quedan asientos libres: espera a que entren o ponles la CPU.' : '¡Sala completa! Ya pueden empezar.');
       } else {
         startBtn.style.display = 'none';
         $('lobbyStatus').textContent = 'Esperando a que el anfitrión empiece la partida…';
@@ -1637,6 +1726,7 @@
         onlineMsg('');
         showLobby();
         broadcastLobby();
+        armRoomExpiry();
       });
       ONLINE.peer.on('connection', onHostConnection);
       ONLINE.peer.on('error', function(err){
@@ -1663,6 +1753,7 @@
         ONLINE.conns[seat] = conn;
         ONLINE.seatStatus[seat] = 'joined';
         try{ conn.send({ t:'welcome', seat: seat, code: ONLINE.code }); }catch(e){}
+        clearRoomExpiry();
         broadcastLobby();
         conn.on('data', function(msg){ onGuestMsg(seat, msg); });
         conn.on('close', function(){ onGuestGone(seat); });
@@ -1690,6 +1781,7 @@
       if (ONLINE.seatStatus[seat]==='joined'){
         ONLINE.seatStatus[seat] = 'open';
         broadcastLobby();
+        armRoomExpiry();
       }
     }
     function hostStartGame(){
@@ -1698,6 +1790,7 @@
       order.forEach(function(s){ types[s] = ONLINE.seatStatus[s]==='cpu' ? 'cpu' : 'human'; });
       ONLINE.mySeat = order[0];
       ONLINE.inGame = true;
+      clearRoomExpiry();
       hideLobby();
       $('setupScreen').style.display = 'none';
       $('gameScreen').style.display = 'block';
@@ -1705,7 +1798,7 @@
       buildBoardDom();
       newGame({
         count: ONLINE.lobby.count, types: types,
-        fog: $('fogToggle').checked, cards: $('cardsToggle').checked
+        fog: $('fogToggleOnline').checked, cards: $('cardsToggleOnline').checked
       });
     }
 
@@ -1898,6 +1991,7 @@
       $('winOverlay').classList.remove('show');
       $('gameScreen').style.display = 'none';
       $('setupScreen').style.display = '';
+      showMode('online');
       onlineMsg('El anfitrión cerró la sala o se desconectó. La partida en línea terminó.');
     }
     function applySnapshot(snap){
@@ -1936,6 +2030,7 @@
 
     /* ---------- Salir de la sala ---------- */
     function leaveOnline(){
+      clearRoomExpiry();
       if (ONLINE.isHost){
         Object.keys(ONLINE.conns).forEach(function(k){
           try{ ONLINE.conns[k].send({ t:'hostLeft' }); }catch(e){}
@@ -1950,6 +2045,50 @@
       if (netTimer){ clearTimeout(netTimer); netTimer = null; }
       hideLobby();
     }
+
+    /* ---------- Caducidad de salas vacías: 10 minutos en espera ---------- */
+    var ROOM_TTL_MS = 10*60*1000;
+    var roomExpiryTimer = null, roomExpiryTick = null, roomExpiryDeadline = 0;
+    function armRoomExpiry(){
+      clearRoomExpiry();
+      if (!ONLINE.active || !ONLINE.isHost || ONLINE.inGame) return;
+      if (Object.keys(ONLINE.conns).length>0) return; // ya entró alguien: no caduca
+      roomExpiryDeadline = Date.now() + ROOM_TTL_MS;
+      roomExpiryTimer = setTimeout(expireRoom, ROOM_TTL_MS);
+      roomExpiryTick = setInterval(updateExpiryLabel, 1000);
+      updateExpiryLabel();
+    }
+    function clearRoomExpiry(){
+      if (roomExpiryTimer){ clearTimeout(roomExpiryTimer); roomExpiryTimer = null; }
+      if (roomExpiryTick){ clearInterval(roomExpiryTick); roomExpiryTick = null; }
+      roomExpiryDeadline = 0;
+      var el = $('lobbyExpiry');
+      if (el){ el.textContent = ''; el.style.display = 'none'; }
+    }
+    function updateExpiryLabel(){
+      var el = $('lobbyExpiry');
+      if (!el) return;
+      if (ONLINE.active && ONLINE.isHost && !ONLINE.inGame && roomExpiryDeadline){
+        var s = Math.max(0, Math.ceil((roomExpiryDeadline - Date.now())/1000));
+        el.textContent = '⏰ Si nadie entra, la sala se cierra sola en ' + Math.floor(s/60) + ':' + ('0'+(s%60)).slice(-2) + '.';
+        el.style.display = '';
+      } else {
+        el.textContent = ''; el.style.display = 'none';
+      }
+    }
+    function expireRoom(){
+      if (!ONLINE.active || !ONLINE.isHost || ONLINE.inGame) return;
+      leaveOnline();
+      showMode('online');
+      onlineMsg('⏰ La sala caducó: nadie entró en 10 minutos y se cerró sola. Crea una nueva sala cuando quieras.');
+      sfx('error');
+    }
+    /* Al cerrar la página se destruye el peer: la sala deja de existir */
+    function destroyPeerOnExit(){
+      try{ if (ONLINE.peer) ONLINE.peer.destroy(); }catch(e){}
+    }
+    window.addEventListener('beforeunload', destroyPeerOnExit);
+    window.addEventListener('pagehide', destroyPeerOnExit);
 
     /* ---------- Controles de la sala ---------- */
     $('onlineCountSeg').querySelectorAll('button').forEach(function(b){
@@ -1997,6 +2136,39 @@
     });
     $('skinBtn').addEventListener('click', function(){ $('skinOverlay').classList.add('show'); });
     $('skinClose').addEventListener('click', function(){ $('skinOverlay').classList.remove('show'); });
+
+    /* ---------- Elegir modo: local o en línea, pantallas separadas ---------- */
+    function showMode(which){
+      $('modeChooser').style.display = which==='chooser' ? '' : 'none';
+      $('localSetup').style.display = which==='local' ? '' : 'none';
+      $('onlineSetup').style.display = which==='online' ? '' : 'none';
+    }
+    $('modeLocalBtn').addEventListener('click', function(){ showMode('local'); sfx('select'); });
+    $('modeOnlineBtn').addEventListener('click', function(){ showMode('online'); sfx('select'); });
+    document.querySelectorAll('.backModesBtn').forEach(function(b){
+      b.addEventListener('click', function(){ showMode('chooser'); sfx('select'); });
+    });
+
+    /* ---------- Copiar el código de la sala ---------- */
+    function fallbackCopy(text){
+      try{
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return !!ok;
+      }catch(e){ return false; }
+    }
+    $('copyCodeBtn').addEventListener('click', function(){
+      var code = ONLINE.code || '';
+      if (!code || code.length!==4){ $('copyMsg').textContent = 'Todavía no hay código para copiar.'; return; }
+      function ok(){ $('copyMsg').textContent = '✅ ¡Código ' + code + ' copiado! Pégalo donde quieras.'; sfx('select'); }
+      function fail(){ $('copyMsg').textContent = 'No se pudo copiar solo: el código es ' + code + ', cópialo a mano.'; }
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(code).then(ok, function(){ if (fallbackCopy(code)) ok(); else fail(); });
+      } else if (fallbackCopy(code)) ok(); else fail();
+    });
 
     applySkin(false);
     buildSeatRows();
