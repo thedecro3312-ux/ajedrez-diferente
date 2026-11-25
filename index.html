@@ -48,6 +48,11 @@
       .btn.danger{ color:var(--danger); }
       .btn.small{ min-height:38px; padding:6px 11px; font-size:14px; }
       .btn:disabled{ opacity:.45; cursor:not-allowed; }
+      .btn.sala{
+        background:var(--board-edge); border-color:var(--board-edge); color:#f3e6c3;
+        font-size:16px; padding:12px 18px; min-height:52px; box-shadow:var(--shadow);
+      }
+      .sala-top{ display:flex; margin-bottom:14px; }
       /* ---------- Setup ---------- */
       .setup-grid{ display:grid; grid-template-columns:1fr; gap:14px; margin-top:16px; }
       @media (min-width:860px){ .setup-grid{ grid-template-columns: 1.25fr .9fr; } }
@@ -216,6 +221,7 @@
     <div class="wrap">
       <!-- ================= SETUP ================= -->
       <section id="setupScreen">
+        <div class="sala-top"><button class="btn sala salaBtn" type="button">← Sala de Juegos</button></div>
         <h1>Ajedrez Diferente ♞</h1>
         <p class="sub">El ajedrez de siempre, pero en un tablero en cruz para <b>2 a 4 jugadores</b>, con tres giros combinables: todos contra todos, niebla de guerra y cartas de poder. En el mismo dispositivo, por turnos, o contra la CPU.</p>
         <div class="setup-grid">
@@ -421,6 +427,7 @@
           <button class="btn primary" id="rematchBtn">↻ Revancha</button>
           <button class="btn" id="winMenuBtn">Menú</button>
         </div>
+        <p style="margin:14px 0 0"><button class="btn sala salaBtn" type="button">← Sala de Juegos</button></p>
       </div>
     </div>
 
@@ -1500,6 +1507,9 @@
     }
     $('menuBtn').addEventListener('click', toMenu);
     $('winMenuBtn').addEventListener('click', toMenu);
+    document.querySelectorAll('.salaBtn').forEach(function(b){
+      b.addEventListener('click', function(){ window.location.href = 'https://thedecro3312-ux.github.io/sala-de-juegos/'; });
+    });
     $('resignBtn').addEventListener('click', function(){
       if (!G || G.phase!=='play' || !seatIsLocalHuman(G.turn)) return;
       if (isGuest()){
